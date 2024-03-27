@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 
 url = "https://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
 
+fichier_text = r"C:\Users\33695\Desktop\Code\P1\infos_produits.txt"
 fichier_text = 'infos_produits.txt'
 
 def scrap_infos(url):
