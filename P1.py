@@ -11,10 +11,12 @@ from bs4 import BeautifulSoup
     #title = soup.find("title")
     #print(title.text)
 
-url = "https://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
+url = "https://books.toscrape.com/catalogue/soumission_998/index.html"
 
 fichier_text = r"C:\Users\33695\Desktop\Code\P1\infos_produits.txt"
 fichier_text = 'infos_produits.txt'
+
+
 
 def scrap_infos(url):
     response = requests.get(url)
@@ -26,6 +28,17 @@ def scrap_infos(url):
    
     soup = BeautifulSoup(response.content, "html.parser")
 
+    titre = soup.find("h1").text
+    print("Titre:", titre)
+
+    div_description = soup.find("div", id="product_description")
+    if div_description:
+        # Trouver le paragraphe suivant le titre de la description
+        p_description = div_description.find_next("p")
+        if p_description:
+            print("Description:", p_description.text)
+
+
     tableau_produit = soup.find("table", class_="table table-striped")
     infos_produit = {}
 
@@ -36,6 +49,7 @@ def scrap_infos(url):
 
     print("Informations extraites avec succès.")
     return infos_produit
+
 
 infos_produit = scrap_infos(url)
 

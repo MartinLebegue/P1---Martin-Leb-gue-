@@ -1,7 +1,7 @@
-UPC: 4165285e1663650f
+UPC: 6957f44c3847a760
 Product Type: Books
-Price (excl. tax): £54.23
-Price (incl. tax): £54.23
+Price (excl. tax): £50.10
+Price (incl. tax): £50.10
 Tax: £0.00
 Availability: In stock (20 available)
 Number of reviews: 0
