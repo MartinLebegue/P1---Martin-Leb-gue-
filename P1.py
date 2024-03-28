@@ -41,11 +41,29 @@ def scrap_infos(url):
             print("Description ajoutée au fichier texte.")
             infos_produit["Product Description"] = p_description.text
 
+    # Trouver la balise <p> qui contient la classe 'star-rating'
     star_rating_element = soup.find("p", class_="star-rating")
 
+    # Extraire le niveau de la note à partir de la classe
+    if star_rating_element:
+
+        # Les classes seront quelque chose comme 'star-rating Three'
+        star_rating_classes = star_rating_element.get('class')  # ['star-rating', 'Three']
+
+        # La classe de notation (par exemple, 'Three') est le deuxième élément de la liste
+        star_rating = star_rating_classes[1] if len(star_rating_classes) > 1 else None
+
+        # Convertir le texte de la note en nombre (par exemple 'Three' devient 3)
+        ratings = {"One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5}
+        star_rating_number = ratings.get(star_rating, 0)
+        print(f"Review out of 5 : {star_rating_number}")
+
+        #Inscrire la review dans le fichier texte
+        infos_produit["Review out of 5"] = star_rating_number
+
+    #Trouver les valeurs dans le tableau descriptif
 
     tableau_produit = soup.find("table", class_="table table-striped")
-
 
     for row in tableau_produit.find_all("tr"):
         header = row.find("th").text
