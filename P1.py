@@ -31,6 +31,15 @@ def scrap_infos(url):
 
     soup = BeautifulSoup(response.content, "html.parser")
 
+    # Trouver la balise <ul> avec la classe 'breadcrumb'
+    breadcrumb = soup.find('ul', class_='breadcrumb')
+    # Trouver toutes les balises <a> dans le breadcrumb
+    links = breadcrumb.find_all('a')
+    if links:
+        category_link = links[-1]  # Avant-dernier lien
+        category_name = category_link.text.strip()
+    infos_produit["Catégorie"] = category_name
+
     #Trouver le titre via le selecteur h1 et l'ajouter au dictionnaire
     titre = soup.find("h1").text
     print("Titre ajouté au fichier texte.")
