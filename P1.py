@@ -26,13 +26,17 @@ def scrap_infos(url):
     else:
         print(f"Erreur HTTP : {response.status_code}")
         return {}
-   
+
+    infos_produit["Porduct Page URL"] = url
+
     soup = BeautifulSoup(response.content, "html.parser")
 
+    #Trouver le titre via le selecteur h1 et l'ajouter au dictionnaire
     titre = soup.find("h1").text
     print("Titre ajouté au fichier texte.")
     infos_produit["Title"] = titre #Ajout au dictionnaire
 
+    #Trouver la description via l'id "product_description" et en déduire le "p" et l'écrire dans le dic
     div_description = soup.find("div", id="product_description")
     if div_description:
         # Trouver le paragraphe suivant le titre de la description
