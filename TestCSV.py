@@ -1,3 +1,4 @@
+
 import requests
 from bs4 import BeautifulSoup
 import csv
@@ -98,3 +99,17 @@ with open(fichier_csv, mode='w', newline='', encoding='utf-8') as csvfile:
     writer.writerow(infos_produit)
 
 print(f"Les informations du produit ont été écrites dans {fichier_csv}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
