@@ -2,7 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
-
+from urllib.parse import urljoin
 #url = "https://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
 
 #response = requests.get(url)
@@ -12,23 +12,22 @@ import csv
     #title = soup.find("title")
     #print(title.text)
 
-url = "https://books.toscrape.com/catalogue/soumission_998/index.html"
 
 fichier_text = r"C:\Users\33695\Desktop\Code\P1\infos_produits.txt"
 fichier_text = 'infos_produits.txt'
 
-def scrap_infos(url):
+def scrap_infos(book_url):
 
     infos_produit = {}
 
-    response = requests.get(url)
+    response = requests.get(book_url)
     if response.status_code == 200:
         print("Réponse HTTP réussie.")
     else:
         print(f"Erreur HTTP : {response.status_code}")
         return {}
 
-    infos_produit["Porduct Page URL"] = url
+    infos_produit["Porduct Page URL"] = book_url
 
     soup = BeautifulSoup(response.content, "html.parser")
 
@@ -85,18 +84,44 @@ def scrap_infos(url):
         infos_produit[header] = value
 
     print("Informations extraites avec succès.")
+
     return infos_produit
 
+def scrape_category_page(category_url):
+    response = requests.get(category_url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    books_info = []
 
-infos_produit = scrap_infos(url)
+    # Supposons que chaque livre soit dans un élément <article class="product_pod">.
+    # Modifier le sélecteur si nécessaire.
+    books = soup.find_all('article', class_='product_pod')
+    for book in books:
+        # Supposons que le lien du livre soit dans un élément <h3> à l'intérieur de <article>.
+        # Modifier le sélecteur si nécessaire.
+        book_link = book.find('h3').find('a')['href']
+        full_book_link = urljoin(category_url, book_link)
+        book_info = scrap_infos(full_book_link)
+        books_info.append(book_info)
+
+    return books_info
+
+# URL de la première page de la catégorie 'Fiction'
+category_url = 'https://books.toscrape.com/catalogue/category/books/fiction_10/index.html'
+
+# Scraping de la première page de la catégorie
+books_info = scrape_category_page(category_url)
+
 
 fichier_csv = "infos_produit.csv"
 
 
+# Écriture dans un fichier CSV
+fichier_csv = "infos_produits.csv"
 with open(fichier_csv, mode='w', newline='', encoding='utf-8') as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames=infos_produit.keys())
+    writer = csv.DictWriter(csvfile, fieldnames=books_info[0].keys())
     writer.writeheader()
-    writer.writerow(infos_produit)
+    for book_info in books_info:
+        writer.writerow(book_info)
 
 print(f"Les informations du produit ont été écrites dans {fichier_csv}")
 
