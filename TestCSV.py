@@ -103,28 +103,47 @@ def scrape_category_page(category_url):
         book_info = scrap_infos(full_book_link)
         books_info.append(book_info)
 
-    return books_info
+    next_link = soup.select_one('li.next > a')
+    next_page_url = urljoin(category_url, next_link['href']) if next_link else None
+
+    return books_info, next_page_url
 
 # URL de la première page de la catégorie 'Fiction'
 category_url = 'https://books.toscrape.com/catalogue/category/books/fiction_10/index.html'
 
+def scrape_category(start_url):
+    all_books_info = []
+    category_url = start_url
+
+    while category_url:
+        books_info, next_page_url = scrape_category_page(category_url)
+        all_books_info.extend(books_info)
+        category_url = next_page_url  # Passer à la page suivante
+
+    return all_books_info
+
+# URL de départ pour la catégorie 'Fiction'
+start_url = 'https://books.toscrape.com/catalogue/category/books/fiction_10/index.html'
+
+# Scraping de toute la catégorie, y compris la gestion de la pagination
+all_books_info = scrape_category(start_url)
+
 # Scraping de la première page de la catégorie
 books_info = scrape_category_page(category_url)
-
-
 fichier_csv = "infos_produit.csv"
 
 
-# Écriture dans un fichier CSV
-fichier_csv = "infos_produits.csv"
-with open(fichier_csv, mode='w', newline='', encoding='utf-8') as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames=books_info[0].keys())
-    writer.writeheader()
-    for book_info in books_info:
-        writer.writerow(book_info)
+if all_books_info:  # Vérifiez que nous avons des données à écrire
+    fichier_csv = "infos_produits.csv"
+    with open(fichier_csv, mode='w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=all_books_info[0].keys())
+        writer.writeheader()
+        for book_info in all_books_info:
+            writer.writerow(book_info)
 
-print(f"Les informations du produit ont été écrites dans {fichier_csv}")
-
+    print(f"Les informations des produits ont été écrites dans {fichier_csv}")
+else:
+    print("Aucune information à écrire.")
 
 
 
