@@ -119,25 +119,37 @@ start_url = 'https://books.toscrape.com/catalogue/category/books/fiction_10/inde
 all_books_info = scrape_category(start_url)
 
 
+def get_categories(home_url):
+    response = requests.get(home_url)
+    if response.status_code != 200:
+        print("Erreur lors de la récupération de la page d'accueil")
+        return []
+
+    soup = BeautifulSoup(response.content, "html.parser")
+    category_links = soup.select('div.side_categories > ul.nav.nav-list > li > ul > li > a')
+    categories = {link.text.strip(): urljoin(home_url, link['href']) for link in category_links}
+
+    return categories
+
+
 def main():
-    # URL de départ pour la catégorie 'Fiction'
-    start_url = 'https://books.toscrape.com/catalogue/category/books/fiction_10/index.html'
+    home_url = 'https://books.toscrape.com/index.html'
+    categories = get_categories(home_url)
 
-    # Scraping de toute la catégorie, y compris la gestion de la pagination
-    all_books_info = scrape_category(start_url)
+    for category_name, category_url in categories.items():
+        print(f"Scraping books in category: {category_name}")
+        all_books_info = scrape_category(category_url)
 
-
-    if all_books_info:  # Vérifiez que nous avons des données à écrire
-        fichier_csv = "infos_produits.csv"
-        with open(fichier_csv, mode='w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=all_books_info[0].keys())
-            writer.writeheader()
-            for book_info in all_books_info:
-                writer.writerow(book_info)
-
-        print(f"Les informations des produits ont été écrites dans {fichier_csv}")
-    else:
-        print("Aucune information à écrire.")
+        if all_books_info:
+            fichier_csv = f"infos_{category_name.replace(' ', '_')}.csv"
+            with open(fichier_csv, mode='w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=all_books_info[0].keys())
+                writer.writeheader()
+                for book_info in all_books_info:
+                    writer.writerow(book_info)
+            print(f"Finished writing to {fichier_csv}")
+        else:
+            print(f"No books found in category: {category_name}")
 
 
 if __name__ == "__main__":
