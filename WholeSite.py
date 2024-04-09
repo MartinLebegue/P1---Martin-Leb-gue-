@@ -3,9 +3,17 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 from urllib.parse import urljoin
+import os
+import re
+
 
 fichier_text = r"C:\Users\33695\Desktop\Code\P1\infos_produits.txt"
 fichier_text = 'infos_produits.txt'
+
+
+def clean_name(name):
+    """Nettoie le nom pour le rendre sûr comme nom de fichier."""
+    return re.sub(r'[\\/*?:"<>|]', "", name).replace(' ', '_').replace('/', '_')[:50]
 
 
 def scrap_infos(book_url):
@@ -19,25 +27,47 @@ def scrap_infos(book_url):
         print(f"Erreur HTTP : {response.status_code}")
         return {}
 
-    infos_produit["Porduct Page URL"] = book_url
+    infos_produit["Product Page URL"] = book_url
 
     soup = BeautifulSoup(response.content, "html.parser")
 
-    # Trouver la balise <ul> avec la classe 'breadcrumb'
+    # Trouver le nom de la Catégorie via breadcrumb
     breadcrumb = soup.find('ul', class_='breadcrumb')
-    # Trouver toutes les balises <a> dans le breadcrumb
     links = breadcrumb.find_all('a')
     if links:
         category_link = links[-1]  # Avant-dernier lien
         category_name = category_link.text.strip()
     infos_produit["Catégorie"] = category_name
 
-    #Trouver le titre via le selecteur h1 et l'ajouter au dictionnaire
+    # Trouver le titre via le selecteur h1 et l'ajouter au dictionnaire
     titre = soup.find("h1").text
     print("Titre ajouté au fichier texte.")
+    titre_clean = clean_name(titre)  # Utilisation de la fonction clean_name pour nettoyer le titre
     infos_produit["Title"] = titre #Ajout au dictionnaire
 
-    #Trouver la description via l'id "product_description" et en déduire le "p" et l'écrire dans le dic
+
+    # Définir le chemin pour le dossier de catégorie
+    category_path = os.path.join('images', category_name)
+    os.makedirs(category_path, exist_ok=True)
+
+    # Extraire l'URL de l'image
+    image_tag = soup.find("div", class_='item active').find('img')
+    if image_tag:
+        image_url = urljoin(book_url, image_tag["src"])
+        response_img = requests.get(image_url)
+        response_img = requests.get(image_url, timeout=10)  # 10 secondes de délai d'attente
+        if response_img.status_code == 200:
+            # Construire le chemin complet pour sauvegarder l'image avec le titre nettoyé
+            img_filename = f"{titre_clean}.jpg"
+            img_path = os.path.join(category_path, img_filename)
+            with open(img_path, 'wb') as f:
+                f.write(response_img.content)
+            print(f"Image sauvegardée sous : {img_path}")
+            infos_produit['Image Path'] = img_path
+
+
+    # Trouver la description via l'id "product_description" et en déduire le "p" et l'écrire dans le dic
+
     div_description = soup.find("div", id="product_description")
     if div_description:
         # Trouver le paragraphe suivant le titre de la description
@@ -63,7 +93,7 @@ def scrap_infos(book_url):
         star_rating_number = ratings.get(star_rating, 0)
         print(f"Review out of 5 : {star_rating_number}")
 
-        #Inscrire la review dans le fichier texte
+        # Inscrire la review dans le fichier texte
         infos_produit["Review out of 5"] = star_rating_number
 
     #Trouver les valeurs dans le tableau descriptif
@@ -80,7 +110,7 @@ def scrap_infos(book_url):
     return infos_produit
 
 
-#Récupère les infos de tous les livres présents sur une page d'une catégorie + Next Page URL
+# Récupère les infos de tous les livres présents sur une page d'une catégorie + Next Page URL
 def scrape_category_page(category_url):
     response = requests.get(category_url)
     soup = BeautifulSoup(response.content, "html.parser")
@@ -98,8 +128,10 @@ def scrape_category_page(category_url):
 
     return books_info, next_page_url
 
+
 # URL de la première page de la catégorie 'Fiction'
 category_url = 'https://books.toscrape.com/catalogue/category/books/fiction_10/index.html'
+
 
 def scrape_category(start_url):
     all_books_info = []
@@ -111,6 +143,7 @@ def scrape_category(start_url):
         category_url = next_page_url  # Passer à la page suivante
 
     return all_books_info
+
 
 # URL de départ pour la catégorie 'Fiction'
 start_url = 'https://books.toscrape.com/catalogue/category/books/fiction_10/index.html'
