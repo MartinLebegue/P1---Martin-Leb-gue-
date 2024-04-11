@@ -12,8 +12,7 @@ fichier_text = 'infos_produits.txt'
 
 
 def clean_name(name):
-    """Nettoie le nom pour le rendre sûr comme nom de fichier."""
-    return re.sub(r'[\\/*?:"<>|]', "", name).replace(' ', '_').replace('/', '_')[:50]
+    return re.sub(r'[\\/*?:"<>|]', "", name).replace(' ', '_').replace('/', '_')
 
 
 def scrap_infos(book_url):
@@ -54,9 +53,9 @@ def scrap_infos(book_url):
     image_tag = soup.find("div", class_='item active').find('img')
     if image_tag:
         image_url = urljoin(book_url, image_tag["src"])
-        response_img = requests.get(image_url)
         response_img = requests.get(image_url, timeout=10)  # 10 secondes de délai d'attente
         if response_img.status_code == 200:
+
             # Construire le chemin complet pour sauvegarder l'image avec le titre nettoyé
             img_filename = f"{titre_clean}.jpg"
             img_path = os.path.join(category_path, img_filename)
@@ -67,7 +66,6 @@ def scrap_infos(book_url):
 
 
     # Trouver la description via l'id "product_description" et en déduire le "p" et l'écrire dans le dic
-
     div_description = soup.find("div", id="product_description")
     if div_description:
         # Trouver le paragraphe suivant le titre de la description
