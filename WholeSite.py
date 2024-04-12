@@ -20,10 +20,8 @@ def scrap_infos(book_url):
     infos_produit = {}
 
     response = requests.get(book_url)
-    if response.status_code == 200:
-        print("Réponse HTTP réussie.")
-    else:
-        print(f"Erreur HTTP : {response.status_code}")
+    if response.status_code != 200:
+        print(f"Erreur lors de l'accès à {book_url} : HTTP {response.status_code}")
         return {}
 
     infos_produit["Product Page URL"] = book_url
@@ -40,7 +38,6 @@ def scrap_infos(book_url):
 
     # Trouver le titre via le selecteur h1 et l'ajouter au dictionnaire
     titre = soup.find("h1").text
-    print("Titre ajouté au fichier texte.")
     titre_clean = clean_name(titre)  # Utilisation de la fonction clean_name pour nettoyer le titre
     infos_produit["Title"] = titre #Ajout au dictionnaire
 
@@ -61,7 +58,6 @@ def scrap_infos(book_url):
             img_path = os.path.join(category_path, img_filename)
             with open(img_path, 'wb') as f:
                 f.write(response_img.content)
-            print(f"Image sauvegardée sous : {img_path}")
             infos_produit['Image Path'] = img_path
 
 
@@ -71,7 +67,6 @@ def scrap_infos(book_url):
         # Trouver le paragraphe suivant le titre de la description
         p_description = div_description.find_next("p")
         if p_description:
-            print("Description ajoutée au fichier texte.")
             infos_produit["Product Description"] = p_description.text
 
     # Trouver la balise <p> qui contient la classe 'star-rating'
@@ -89,7 +84,6 @@ def scrap_infos(book_url):
         # Convertir le texte de la note en nombre (par exemple 'Three' devient 3)
         ratings = {"One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5}
         star_rating_number = ratings.get(star_rating, 0)
-        print(f"Review out of 5 : {star_rating_number}")
 
         # Inscrire la review dans le fichier texte
         infos_produit["Review out of 5"] = star_rating_number
@@ -102,8 +96,6 @@ def scrap_infos(book_url):
         header = row.find("th").text
         value = row.find("td").text
         infos_produit[header] = value
-
-    print("Informations extraites avec succès.")
 
     return infos_produit
 
@@ -140,6 +132,7 @@ def scrape_category(start_url):
         all_books_info.extend(books_info)
         category_url = next_page_url  # Passer à la page suivante
 
+
     return all_books_info
 
 
@@ -168,19 +161,23 @@ def main():
     categories = get_categories(home_url)
 
     for category_name, category_url in categories.items():
-        print(f"Scraping books in category: {category_name}")
+        print(f"Début du prélèvement des données de la catégorie {category_name}")
         all_books_info = scrape_category(category_url)
 
         if all_books_info:
-            fichier_csv = f"infos_{category_name.replace(' ', '_')}.csv"
+            dossier_donnees = "Données"  # Utilisez une casse cohérente pour les noms de variables
+            category_name_clean = category_name.replace(' ', '_')
+            os.makedirs(dossier_donnees, exist_ok=True)  # Créez le dossier s'il n'existe pas
+            fichier_csv = os.path.join(dossier_donnees, f"infos_{category_name_clean}.csv")
+
             with open(fichier_csv, mode='w', newline='', encoding='utf-8') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=all_books_info[0].keys())
                 writer.writeheader()
                 for book_info in all_books_info:
                     writer.writerow(book_info)
-            print(f"Finished writing to {fichier_csv}")
+            print(f"Fin du prélèvement de la catégorie {category_name}. {len(all_books_info)} livres traités.")
         else:
-            print(f"No books found in category: {category_name}")
+            print(f"Aucun livre trouvé dans la catégorie {category_name}.")
 
 
 if __name__ == "__main__":

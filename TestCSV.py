@@ -34,7 +34,7 @@ def scrap_infos(book_url):
 
     #Trouver le titre via le selecteur h1 et l'ajouter au dictionnaire
     titre = soup.find("h1").text
-    print("Titre ajouté au fichier texte.")
+
     infos_produit["Title"] = titre #Ajout au dictionnaire
 
     #Trouver la description via l'id "product_description" et en déduire le "p" et l'écrire dans le dic
@@ -43,7 +43,7 @@ def scrap_infos(book_url):
         # Trouver le paragraphe suivant le titre de la description
         p_description = div_description.find_next("p")
         if p_description:
-            print("Description ajoutée au fichier texte.")
+
             infos_produit["Product Description"] = p_description.text
 
     # Trouver la balise <p> qui contient la classe 'star-rating'
@@ -75,7 +75,7 @@ def scrap_infos(book_url):
         value = row.find("td").text
         infos_produit[header] = value
 
-    print("Informations extraites avec succès.")
+
 
     return infos_produit
 
