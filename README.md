@@ -1,6 +1,6 @@
 # Books to Scrap - Beta Scraper 
 
-Ce script en version béta est un système de surveillance des prixs limitté à un seul revendeur. Ce script permet d'extraire l'ensemble du site [Books To Scrap ](https://books.toscrape.com/) et de trier les données ainsi que les images. Il permet de ce fait, une surveillance complête sur commande. 
+Ce script en version bêta est un système de surveillance des prix limité à un seul revendeur. Ce script permet d'extraire l'ensemble du site [Books To Scrap ](https://books.toscrape.com/) et de trier les données ainsi que les images. Il permet de ce fait, une surveillance complète sur commande. 
 
 ## Fonctionnalités
 Extraction rapide et efficace des données.
@@ -45,7 +45,7 @@ Pour exécuter l'application, utilisez la commande suivante dans le terminal ave
 
 Remplacez nom_du_script.py par le nom réel de votre script Python.
 
-## Ce que Fait l'Application
+###  Ce que Fait l'Application
 Lorsque vous exécutez l'application, elle effectue les opérations suivantes :
 
 ***Création de Fichiers CSV :*** Pour chaque catégorie de livre traitée, l'application crée un fichier "Données" dans lequel il inscrit les fichiers CSV divisés selon les catégories du site. Ces fichiers contiennent des informations sur les livres de la catégorie respective, telles que le titre, le prix, etc.
@@ -77,12 +77,12 @@ Assurez-vous que le dossier de votre projet a suffisamment d'espace disponible p
 ## Erreurs Potentielles et Leur Résolution
 Lors de la configuration et de l'exécution de l'application, vous pourriez rencontrer certaines erreurs. Voici une liste des erreurs courantes et des suggestions pour les résoudre :
 
-##~# Dépendances Manquantes
+### Dépendances Manquantes
 ***Erreur: pip install -r requirements.txt*** échoue ou des erreurs se produisent lors de l'installation des dépendances.
 
 ***Solution:*** essayer d'installer les dépendances une par une. 
 
-`pip install request`
+`pip install requests`
 
 `pip install Bs4`
 
